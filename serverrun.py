@@ -3,8 +3,8 @@ import os
 import sys
 
 # Define paths
-backend_dir = r"C:\Users\laksh\Pictures\sunsleepers\HC_06\model"
-frontend_dir = r"C:\Users\laksh\Pictures\sunsleepers\HC_06\frontend"
+chatroomserver = r"HC_06\model\app.py"
+moodserver = r"HC_06\model\server.js"
 
 # Define commands
 backend_cmd = ["python", "app.py"]
@@ -15,7 +15,7 @@ print("🚀 Starting both servers...\n")
 # Start backend and frontend concurrently, outputting to the same terminal
 backend_proc = subprocess.Popen(
     backend_cmd,
-    cwd=backend_dir,
+    cwd=chatroomserver,
     stdout=sys.stdout,
     stderr=sys.stderr,
     shell=True
@@ -23,7 +23,7 @@ backend_proc = subprocess.Popen(
 
 frontend_proc = subprocess.Popen(
     frontend_cmd,
-    cwd=frontend_dir,
+    cwd=moodserver,
     stdout=sys.stdout,
     stderr=sys.stderr,
     shell=True
