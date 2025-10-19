@@ -37,5 +37,7 @@ To get the Pulse application up and running on your local machine, follow these 
 
 3. In the serverrun.py file, adjust your routes to 'model/app.py' and 'model/server.py'
 
-4.  **Access the application:**
+4. Access the frontend by running 'npm start' in the frontend directory and the backend by running 'python serverrun.py' in the model directory.
+
+5.  **Access the application:**
     Once the services are running, open your web browser and navigate to `http://localhost:3000` (or the port specified in the `frontend/package.json` proxy if different, typically 3000 or 5000 for React apps).
