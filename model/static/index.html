@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Student Health Voice Assistant</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f6f8fa;
+        text-align: center;
+        padding: 30px;
+      }
+      button {
+        padding: 12px 20px;
+        margin: 10px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      .box {
+        background: #fff;
+        margin: 20px auto;
+        padding: 20px;
+        border-radius: 10px;
+        width: 70%;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <h2>🎙️ HealthMate – Your Student Wellness Assistant</h2>
+    <p>Speak about how you feel today. I’ll listen and guide you!</p>
+    <button id="startBtn">Start Recording</button>
+    <button id="stopBtn" disabled>Stop Recording</button>
+
+    <div class="box">
+      <h3>🗣️ Transcript</h3>
+      <p id="transcript"></p>
+    </div>
+
+    <div class="box">
+      <h3>💬 Assistant Reply</h3>
+      <p id="response"></p>
+      <audio id="audio" controls></audio>
+    </div>
+
+    <script>
+      let mediaRecorder,
+        chunks = [];
+
+      const startBtn = document.getElementById("startBtn");
+      const stopBtn = document.getElementById("stopBtn");
+      const transcriptEl = document.getElementById("transcript");
+      const responseEl = document.getElementById("response");
+      const audioEl = document.getElementById("audio");
+
+      startBtn.onclick = async () => {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        mediaRecorder = new MediaRecorder(stream);
+        chunks = [];
+
+        mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+        mediaRecorder.onstop = async () => {
+          const blob = new Blob(chunks, { type: "audio/webm" });
+          const formData = new FormData();
+          formData.append("audio", blob, "recording.webm");
+
+          // 1️⃣ Send to Flask for transcription
+          const transRes = await fetch("/api/transcribe", {
+            method: "POST",
+            body: formData,
+          });
+          const transJson = await transRes.json();
+          transcriptEl.textContent = transJson.text || "[Couldn't transcribe]";
+
+          // 2️⃣ Send transcript to Flask for response + speech
+          const respRes = await fetch("/api/respond", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: transJson.text }),
+          });
+          const respJson = await respRes.json();
+          responseEl.textContent = respJson.assistant_text;
+          audioEl.src = respJson.audio_base64;
+          audioEl.play();
+        };
+
+        mediaRecorder.start();
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+      };
+
+      stopBtn.onclick = () => {
+        mediaRecorder.stop();
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+      };
+    </script>
+  </body>
+</html>
